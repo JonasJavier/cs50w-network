@@ -1,6 +1,8 @@
-# Network 3.0
+# CS50W Network
 
 A professional social network — originally built for Harvard's **CS50W (Project 4)** and rebuilt from the ground up as a modern, production-ready full-stack application.
+
+> Academic context: the original project was completed for Harvard's *CS50's Web Programming with Python and JavaScript*. This repository documents the substantially expanded full-stack version.
 
 | Layer    | Stack |
 | -------- | ----- |
