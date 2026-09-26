@@ -94,12 +94,14 @@ curl https://<api-domain>/health/                          # {"status":"ok",...}
 curl -I https://<web-domain>/                              # 200
 ```
 
-Seed demo data once (optional):
+Seed demo data (optional):
 
 ```bash
 railway ssh --service api -- python manage.py seed
 railway ssh --service api -- python manage.py createsuperuser
 ```
+
+Without SSH access (CI, restricted networks), set `SEED_ON_START=1` on the `api` service: the entrypoint runs the idempotent `seed` command after migrations on every boot. Remove the variable afterwards if you do not want the demo content recreated on each deploy.
 
 ## Alternative: Docker Compose on a VPS
 

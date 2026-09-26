@@ -61,4 +61,5 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md). In short: ruff for Python, ESLint + P
 - **`ImproperlyConfigured: DJANGO_SECRET_KEY must be set`** — you started the API with `DJANGO_DEBUG=0` and no key. Generate one: `python -c "import secrets; print(secrets.token_urlsafe(64))"`.
 - **CORS errors in the browser** — add the frontend origin to `CORS_ALLOWED_ORIGINS` (comma-separated, with scheme and port).
 - **Images 404 in production** — either mount a persistent volume at `MEDIA_ROOT` (and keep `SERVE_MEDIA=1`) or configure the S3 variables. Container disks are ephemeral.
+- **Demo data in a container** — set `SEED_ON_START=1` (or run `python manage.py seed` inside it); the command is idempotent.
 - **"Too many attempts"** — the auth throttle (`THROTTLE_AUTH`, default 10/min per IP) kicked in; wait a minute or raise it locally.
