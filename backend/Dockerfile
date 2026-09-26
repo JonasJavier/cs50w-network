@@ -28,10 +28,11 @@ COPY . .
 RUN DJANGO_SECRET_KEY=build-only-placeholder-not-used-at-runtime-0123456789 \
     python manage.py collectstatic --noinput
 
+# The container starts as root only to fix the ownership of a mounted media
+# volume, then drops to the unprivileged user (see docker-entrypoint.sh).
 RUN useradd --create-home --uid 1000 appuser \
     && mkdir -p /app/media \
     && chown -R appuser:appuser /app
-USER appuser
 
 EXPOSE 8000
 
