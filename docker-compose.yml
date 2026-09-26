@@ -2,9 +2,8 @@
 #
 #   docker compose up --build
 #
-# Frontend: http://localhost:8080  ·  API: http://localhost:8000
-# Optional: seed demo data with
-#   docker compose exec api python manage.py seed
+# Frontend: http://localhost:8080  ·  API: http://localhost:8000  ·  Docs: http://localhost:8000/api/docs/
+# Optional demo data:  docker compose exec api python manage.py seed
 
 services:
   db:
@@ -23,6 +22,7 @@ services:
 
   redis:
     image: redis:8-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -33,13 +33,15 @@ services:
     build: ./backend
     environment:
       DJANGO_DEBUG: "0"
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-insecure-compose-key-change-me}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-insecure-compose-only-key-change-me-0123456789abcdef}
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,api
       # No TLS terminator in this local stack:
       DJANGO_SECURE_SSL_REDIRECT: "0"
       DATABASE_URL: postgres://network:${POSTGRES_PASSWORD:-network}@db:5432/network
       REDIS_URL: redis://redis:6379/0
       CORS_ALLOWED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      MEDIA_ROOT: /app/media
     ports:
       - "8000:8000"
     volumes:
@@ -55,6 +57,8 @@ services:
       context: ./frontend
       args:
         VITE_API_URL: http://localhost:8000
+    environment:
+      PORT: "80"
     ports:
       - "8080:80"
     depends_on:
