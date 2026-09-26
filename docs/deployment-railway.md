@@ -1,5 +1,7 @@
 # Deploying to Railway
 
+> **Reference deployment:** https://web-production-9475c.up.railway.app (web) · https://api-production-53d41.up.railway.app (API) — the setup described below, running on the Railway project `network`.
+
 Network runs as **two services from this monorepo** plus a PostgreSQL database (Redis optional):
 
 | Service | Root directory | Builder | Port | Health check |

@@ -8,6 +8,17 @@
 
 Feed with reposts & quotes · threaded comments · @mentions & #hashtags · bookmarks · notifications · profiles · search · dark mode · PWA
 
+<br>
+
+<a href="https://web-production-9475c.up.railway.app"><img src="https://img.shields.io/badge/%F0%9F%9A%80_LIVE_DEMO-Open_the_app-4f46e5?style=for-the-badge" alt="Open the live demo" height="40" /></a>
+
+### 🌐 Try it now → **[web-production-9475c.up.railway.app](https://web-production-9475c.up.railway.app)**
+
+Log in with any demo account — `ada`, `grace`, `linus`, `margaret`, `alan`, `katherine`, `tim`, `hedy` — password **`network123`**, or create your own.<br>
+API: [api-production-53d41.up.railway.app/api/docs](https://api-production-53d41.up.railway.app/api/docs/) (Swagger) · [/health/](https://api-production-53d41.up.railway.app/health/)
+
+<br>
+
 [![CI](https://github.com/JonasJavier/cs50w-network/actions/workflows/ci.yml/badge.svg)](https://github.com/JonasJavier/cs50w-network/actions/workflows/ci.yml)
 ![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![Django 6](https://img.shields.io/badge/Django-6.0-092E20?logo=django&logoColor=white)
@@ -17,7 +28,7 @@ Feed with reposts & quotes · threaded comments · @mentions & #hashtags · book
 ![Tailwind CSS 4](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
 
-[Features](#features) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [API](#api) · [Deployment](#deployment) · [Docs](#documentation)
+[**Live demo**](https://web-production-9475c.up.railway.app) · [Features](#features) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [API](#api) · [Deployment](#deployment) · [Docs](#documentation)
 
 </div>
 
@@ -188,6 +199,8 @@ GET    /health/
 ```
 
 ## Deployment
+
+**Production instance (Railway):** web **https://web-production-9475c.up.railway.app** · API **https://api-production-53d41.up.railway.app** (health check at `/health/`, Swagger at `/api/docs/`).
 
 The repository ships two `$PORT`-aware Docker images with health checks and `railway.json` files, so a Railway project is: **Postgres + `api` (root `backend/`) + `web` (root `frontend/`)**, a volume (or S3) for uploads, and a handful of variables. The step-by-step guide, including the exact variables and CLI commands, is in **[docs/deployment-railway.md](docs/deployment-railway.md)**. Docker Compose behind any TLS-terminating proxy works the same way.
 
