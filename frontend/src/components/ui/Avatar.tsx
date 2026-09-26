@@ -21,8 +21,10 @@ export function Avatar({ user, size = 'md', className }: AvatarProps) {
       <img
         src={user.avatar}
         alt={user.name}
+        loading="lazy"
+        decoding="async"
         className={cn(
-          'shrink-0 rounded-full object-cover ring-1 ring-zinc-200 dark:ring-zinc-700',
+          'shrink-0 rounded-full bg-zinc-100 object-cover ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700',
           SIZES[size],
           className,
         )}
@@ -31,9 +33,10 @@ export function Avatar({ user, size = 'md', className }: AvatarProps) {
   }
   return (
     <div
+      role="img"
       aria-label={user.name}
       className={cn(
-        'flex shrink-0 select-none items-center justify-center rounded-full bg-gradient-to-br font-semibold text-white',
+        'flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br font-semibold text-white select-none',
         gradientFor(user.username),
         SIZES[size],
         className,

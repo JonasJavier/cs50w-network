@@ -1,11 +1,26 @@
+import { Check, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
-import { LogoMark } from '../components/layout/Logo'
 import { Button } from '../components/ui/Button'
+import { Field, Input, PasswordInput } from '../components/ui/Field'
 import { useRegister } from '../hooks/useAuth'
-import { apiErrorMessage } from '../lib/api'
+import { apiErrorMessage, apiFieldErrors } from '../lib/api'
+import { cn } from '../lib/utils'
 import { useAuthStore } from '../stores/auth'
-import { AuthLayout } from './AuthLayout'
+import { AuthCardHeader, AuthLayout } from './AuthLayout'
+
+const USERNAME_RE = /^[A-Za-z0-9_.]{3,30}$/
+
+function passwordChecks(password: string, username: string) {
+  return [
+    { label: 'At least 8 characters', ok: password.length >= 8 },
+    { label: 'Not only numbers', ok: password.length > 0 && !/^\d+$/.test(password) },
+    {
+      label: 'Different from your username',
+      ok: password.length > 0 && (!username || password.toLowerCase() !== username.toLowerCase()),
+    },
+  ]
+}
 
 export function RegisterPage() {
   const access = useAuthStore((state) => state.access)
@@ -19,32 +34,47 @@ export function RegisterPage() {
     password: '',
     confirm: '',
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
 
   if (access) return <Navigate to="/" replace />
 
-  const set =
-    (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((value) => ({ ...value, [key]: event.target.value }))
+  const set = (key: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((value) => ({ ...value, [key]: event.target.value }))
+    setErrors((value) => ({ ...value, [key]: '' }))
+  }
+
+  const checks = passwordChecks(form.password, form.username)
+  const usernameValid = USERNAME_RE.test(form.username)
+  const passwordsMatch = form.confirm.length > 0 && form.password === form.confirm
+  const canSubmit =
+    usernameValid && form.email.includes('@') && checks.every((check) => check.ok) && passwordsMatch
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
     setError(null)
+    setErrors({})
+    if (!usernameValid) {
+      return setErrors({ username: '3–30 characters: letters, numbers, dots and underscores.' })
+    }
     if (form.password !== form.confirm) {
-      setError('Passwords do not match.')
-      return
+      return setErrors({ confirm: 'Passwords do not match.' })
     }
     register.mutate(
       {
-        username: form.username,
-        email: form.email,
-        first_name: form.first_name,
-        last_name: form.last_name,
+        username: form.username.trim(),
+        email: form.email.trim(),
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
         password: form.password,
       },
       {
-        onSuccess: () => navigate('/'),
-        onError: (err) => setError(apiErrorMessage(err)),
+        onSuccess: () => navigate('/', { replace: true }),
+        onError: (err) => {
+          const fieldErrors = apiFieldErrors(err)
+          setErrors(fieldErrors)
+          if (Object.keys(fieldErrors).length === 0) setError(apiErrorMessage(err))
+        },
       },
     )
   }
@@ -52,101 +82,130 @@ export function RegisterPage() {
   return (
     <AuthLayout>
       <div className="card p-8">
-        <div className="mb-6 flex items-center gap-3 lg:hidden">
-          <LogoMark className="size-9" />
-          <span className="text-xl font-extrabold tracking-tight">Network</span>
-        </div>
-        <h2 className="text-2xl font-extrabold">Create your account</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Join the network in less than a minute.
-        </p>
+        <AuthCardHeader
+          title="Create your account"
+          subtitle="Join the network in less than a minute."
+        />
 
-        <form onSubmit={submit} className="mt-6 space-y-4">
+        <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="first_name" className="mb-1.5 block text-sm font-medium">
-                First name
-              </label>
-              <input
-                id="first_name"
-                value={form.first_name}
-                onChange={set('first_name')}
-                autoComplete="given-name"
-                className="input-base"
+            <Field label="First name" error={errors.first_name}>
+              {(props) => (
+                <Input
+                  {...props}
+                  value={form.first_name}
+                  onChange={set('first_name')}
+                  autoComplete="given-name"
+                  maxLength={150}
+                />
+              )}
+            </Field>
+            <Field label="Last name" error={errors.last_name}>
+              {(props) => (
+                <Input
+                  {...props}
+                  value={form.last_name}
+                  onChange={set('last_name')}
+                  autoComplete="family-name"
+                  maxLength={150}
+                />
+              )}
+            </Field>
+          </div>
+          <Field
+            label="Username"
+            error={errors.username}
+            hint={
+              form.username && !usernameValid
+                ? '3–30 characters: letters, numbers, dots and underscores.'
+                : undefined
+            }
+          >
+            {(props) => (
+              <Input
+                {...props}
+                value={form.username}
+                onChange={set('username')}
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+                maxLength={30}
+                required
               />
-            </div>
-            <div>
-              <label htmlFor="last_name" className="mb-1.5 block text-sm font-medium">
-                Last name
-              </label>
-              <input
-                id="last_name"
-                value={form.last_name}
-                onChange={set('last_name')}
-                autoComplete="family-name"
-                className="input-base"
+            )}
+          </Field>
+          <Field label="Email" error={errors.email}>
+            {(props) => (
+              <Input
+                {...props}
+                type="email"
+                value={form.email}
+                onChange={set('email')}
+                autoComplete="email"
+                inputMode="email"
+                required
               />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="username" className="mb-1.5 block text-sm font-medium">
-              Username
-            </label>
-            <input
-              id="username"
-              value={form.username}
-              onChange={set('username')}
-              autoComplete="username"
-              required
-              className="input-base"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={set('email')}
-              autoComplete="email"
-              required
-              className="input-base"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
+            )}
+          </Field>
+          <Field label="Password" error={errors.password}>
+            {(props) => (
+              <PasswordInput
+                {...props}
                 value={form.password}
                 onChange={set('password')}
                 autoComplete="new-password"
                 required
-                className="input-base"
               />
-            </div>
-            <div>
-              <label htmlFor="confirm" className="mb-1.5 block text-sm font-medium">
-                Confirm
-              </label>
-              <input
-                id="confirm"
-                type="password"
+            )}
+          </Field>
+          {form.password && (
+            <ul className="grid gap-1 text-xs" aria-live="polite">
+              {checks.map((check) => (
+                <li
+                  key={check.label}
+                  className={cn(
+                    'flex items-center gap-1.5',
+                    check.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500',
+                  )}
+                >
+                  {check.ok ? <Check className="size-3.5" /> : <X className="size-3.5" />}
+                  {check.label}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Field
+            label="Confirm password"
+            error={
+              errors.confirm ??
+              (form.confirm && !passwordsMatch ? 'Passwords do not match.' : undefined)
+            }
+          >
+            {(props) => (
+              <PasswordInput
+                {...props}
                 value={form.confirm}
                 onChange={set('confirm')}
                 autoComplete="new-password"
                 required
-                className="input-base"
               />
-            </div>
-          </div>
-          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-          <Button type="submit" loading={register.isPending} className="w-full py-2.5">
+            )}
+          </Field>
+          {error && (
+            <p
+              role="alert"
+              className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300"
+            >
+              {error}
+            </p>
+          )}
+          <Button
+            type="submit"
+            size="lg"
+            loading={register.isPending}
+            disabled={!canSubmit}
+            className="w-full"
+          >
             Create account
           </Button>
         </form>
