@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 condition=models.Q(
                     ("content", ""),
-                    models.Q(("image__isnull", True), ("image", ""), _connector="OR"),
+                    models.Q(("image", ""), ("image__isnull", True), _connector="OR"),
                 ),
                 fields=("author", "repost_of"),
                 name="unique_plain_repost",
