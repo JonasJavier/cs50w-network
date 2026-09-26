@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please **do not open a public issue** for security problems. Email the maintainer (see the GitHub profile of [@jonasjavier](https://github.com/jonasjavier)) with a description of the issue and steps to reproduce. You will get an acknowledgement within a few days.
+Please **do not open a public issue** for security problems. Email the maintainer (see the GitHub profile of [@JonasJavier](https://github.com/JonasJavier)) with a description of the issue and steps to reproduce. You will get an acknowledgement within a few days.
 
 ## What is in place
 

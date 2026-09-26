@@ -5,7 +5,7 @@ Thanks for taking the time to contribute! This document explains how the project
 ## Getting started
 
 ```bash
-git clone https://github.com/jonasjavier/cs50w-network.git
+git clone https://github.com/JonasJavier/cs50w-network.git
 cd cs50w-network
 make setup          # backend deps (into the active Python env) + frontend deps
 make migrate seed   # SQLite database with demo data

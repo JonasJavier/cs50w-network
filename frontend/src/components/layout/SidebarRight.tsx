@@ -72,7 +72,7 @@ export function SidebarRight() {
       <p className="px-2 text-xs text-zinc-400 dark:text-zinc-600">
         Network · Django REST Framework + React ·{' '}
         <a
-          href="https://github.com/jonasjavier/cs50w-network"
+          href="https://github.com/JonasJavier/cs50w-network"
           target="_blank"
           rel="noreferrer"
           className="hover:underline"

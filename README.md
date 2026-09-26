@@ -8,7 +8,7 @@
 
 Feed with reposts & quotes · threaded comments · @mentions & #hashtags · bookmarks · notifications · profiles · search · dark mode · PWA
 
-[![CI](https://github.com/jonasjavier/cs50w-network/actions/workflows/ci.yml/badge.svg)](https://github.com/jonasjavier/cs50w-network/actions/workflows/ci.yml)
+[![CI](https://github.com/JonasJavier/cs50w-network/actions/workflows/ci.yml/badge.svg)](https://github.com/JonasJavier/cs50w-network/actions/workflows/ci.yml)
 ![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![Django 6](https://img.shields.io/badge/Django-6.0-092E20?logo=django&logoColor=white)
 ![DRF](https://img.shields.io/badge/Django%20REST%20Framework-3.17-A30000)
@@ -116,7 +116,7 @@ Network started as Harvard's **CS50W Project 4** and was rebuilt from scratch as
 **Requirements:** Python 3.12+ (3.13 recommended) and Node 20+. No database server needed — development uses SQLite and an in-memory cache.
 
 ```bash
-git clone https://github.com/jonasjavier/cs50w-network.git
+git clone https://github.com/JonasJavier/cs50w-network.git
 cd cs50w-network
 
 # API
