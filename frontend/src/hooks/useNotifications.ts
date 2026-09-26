@@ -3,9 +3,11 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type InfiniteData,
 } from '@tanstack/react-query'
 import { api, fetchPage } from '../lib/api'
 import type { AppNotification, CursorPage } from '../lib/types'
+import { mapPages } from './cache'
 
 export function useNotifications() {
   return useInfiniteQuery({
@@ -25,6 +27,7 @@ export function useUnreadCount() {
       return data.count
     },
     refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -34,8 +37,19 @@ export function useMarkRead() {
     mutationFn: async (id: number) => {
       await api.post(`/notifications/${id}/read/`)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    onMutate: (id) => {
+      queryClient.setQueryData<InfiniteData<CursorPage<AppNotification>>>(
+        ['notifications'],
+        (data) =>
+          mapPages(data, (notification) =>
+            notification.id === id ? { ...notification, is_read: true } : notification,
+          ),
+      )
+      queryClient.setQueryData<number>(['notifications-unread'], (count) =>
+        Math.max(0, (count ?? 1) - 1),
+      )
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications-unread'] })
     },
   })
@@ -48,8 +62,27 @@ export function useMarkAllRead() {
       await api.post('/notifications/read-all/')
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      queryClient.invalidateQueries({ queryKey: ['notifications-unread'] })
+      queryClient.setQueryData<InfiniteData<CursorPage<AppNotification>>>(
+        ['notifications'],
+        (data) => mapPages(data, (notification) => ({ ...notification, is_read: true })),
+      )
+      queryClient.setQueryData(['notifications-unread'], 0)
+    },
+  })
+}
+
+export function useClearNotifications() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      await api.delete('/notifications/clear/')
+    },
+    onSuccess: () => {
+      queryClient.setQueryData<InfiniteData<CursorPage<AppNotification>>>(
+        ['notifications'],
+        (data) => data && { ...data, pages: [{ next: null, previous: null, results: [] }] },
+      )
+      queryClient.setQueryData(['notifications-unread'], 0)
     },
   })
 }

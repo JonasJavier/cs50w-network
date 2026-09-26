@@ -23,6 +23,7 @@ backend/staticfiles/
 # Node / frontend
 node_modules/
 frontend/dist/
+frontend/coverage/
 *.tsbuildinfo
 
 # Editors / OS

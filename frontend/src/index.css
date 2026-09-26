@@ -1,9 +1,10 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -16,14 +17,62 @@
   --color-brand-800: #3730a3;
   --color-brand-900: #312e81;
   --color-brand-950: #1e1b4b;
+
+  --animate-fade-in: fade-in 150ms ease-out both;
+  --animate-scale-in: scale-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-slide-up: slide-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pop: pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.35);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   @apply bg-zinc-100 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  text-rendering: optimizeLegibility;
 }
 
 /* Subtle scrollbars */
@@ -35,6 +84,22 @@ body {
   scrollbar-color: var(--color-zinc-700) transparent;
 }
 
+::selection {
+  @apply bg-brand-500/25;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Reusable surface card */
 @utility card {
   @apply rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900;
@@ -42,5 +107,10 @@ body {
 
 /* Form input */
 @utility input-base {
-  @apply w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500;
+  @apply w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500;
+}
+
+/* Visually highlighted comment (deep link from a notification) */
+@utility highlight-target {
+  @apply ring-2 ring-brand-500/60 ring-offset-2 ring-offset-white dark:ring-offset-zinc-900;
 }

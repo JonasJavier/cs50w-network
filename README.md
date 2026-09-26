@@ -1,139 +1,208 @@
-# CS50W Network
+<div align="center">
 
-A professional social network — originally built for Harvard's **CS50W (Project 4)** and rebuilt from the ground up as a modern, production-ready full-stack application.
+<img src="frontend/public/icons/icon-192.png" alt="Network logo" width="96" height="96" />
 
-> Academic context: the original project was completed for Harvard's *CS50's Web Programming with Python and JavaScript*. This repository documents the substantially expanded full-stack version.
+# Network
 
-| Layer    | Stack |
-| -------- | ----- |
-| Backend  | Django 6 · Django REST Framework · SimpleJWT · PostgreSQL · Redis |
-| Frontend | React 19 · Vite · TypeScript · Tailwind CSS 4 · TanStack Query · Zustand |
-| Infra    | Docker Compose · Gunicorn · WhiteNoise · Nginx |
+**A professional social network — production-ready, full-stack, open source.**
+
+Feed with reposts & quotes · threaded comments · @mentions & #hashtags · bookmarks · notifications · profiles · search · dark mode · PWA
+
+[![CI](https://github.com/JonasJavier/cs50w-network/actions/workflows/ci.yml/badge.svg)](https://github.com/JonasJavier/cs50w-network/actions/workflows/ci.yml)
+![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![Django 6](https://img.shields.io/badge/Django-6.0-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/Django%20REST%20Framework-3.17-A30000)
+![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS 4](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
+
+[Features](#features) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [API](#api) · [Deployment](#deployment) · [Docs](#documentation)
+
+</div>
+
+---
+
+Network started as Harvard's **CS50W Project 4** and was rebuilt from scratch as a modern, decoupled application: a Django REST API and a React single-page app, each with its own tests, Docker image and CI pipeline. It is designed to be deployed as-is (Railway, Docker Compose, any container platform) and to read like a real product, not a homework assignment.
 
 ## Features
 
-- 🔐 **JWT authentication** with refresh-token rotation and blacklist on logout
-- 📰 **Infinite-scroll feed** (cursor pagination) with *For you* / *Following* tabs
-- ✍️ Posts with text and images, inline edit & delete
-- ❤️ Likes with optimistic UI updates
-- 💬 Comments with one-level threaded replies and comment likes
-- 👤 Rich profiles: avatar, cover, headline, bio, location, website, media grid
-- ➕ Follow/unfollow with follower/following lists and *Who to follow* suggestions (Redis-cached)
-- 🔔 Notifications (follows, likes, comments, replies) with unread badge
-- 🔎 Search across people and posts
-- 🌙 Dark/light theme, fully responsive (bottom navigation on mobile)
-- 📚 OpenAPI schema with Swagger UI at `/api/docs/`
+| | |
+| --- | --- |
+| 📰 **Feed** | *For you* and *Following* timelines with cursor-based infinite scroll, skeleton loading and optimistic updates. |
+| ✍️ **Posts** | Text up to 2 000 characters with an image (drag-and-drop or paste). Edit and delete your own posts with confirmation. |
+| 🔁 **Reposts & quotes** | Repost with one click or quote a post with your own comment; counters and notifications included. |
+| ❤️ **Likes** | Like posts and comments, see who liked a post, browse the posts a person has liked. |
+| 💬 **Comments** | Threaded replies (one level), edit/delete your own, like any comment, deep links from notifications highlight the comment. |
+| 🏷️ **Hashtags & mentions** | `#topics` are extracted server-side, searchable and ranked in a *Trending this week* widget; `@mentions` link to profiles and notify the person. |
+| 🔖 **Bookmarks** | Private saved-posts list. |
+| 👤 **Profiles** | Avatar and cover uploads (auto-resized, EXIF-stripped WebP), headline, bio, location, website; tabs for posts, media grid and likes; follower/following lists. |
+| ➕ **Follow graph** | Follow/unfollow, *Follows you* badges, *Who to follow* suggestions cached in Redis. |
+| 🔔 **Notifications** | Follows, likes, comments, replies, mentions, reposts and quotes with unread badge, mark-as-read and clear. |
+| 🔎 **Search** | People (name, username, headline) and posts, `#hashtag` mode, debounced as you type, `/` shortcut. |
+| ⚙️ **Account** | Log in with username *or* email, change password (revokes other sessions), delete account, light/dark/system theme. |
+| 📱 **Responsive PWA** | Bottom navigation on phones, installable web manifest, self-hosted font, no third-party requests. |
+| 🛡️ **Production hardening** | JWT with refresh rotation & blacklist, rate limiting on credential endpoints, HSTS/CSP/security headers, health checks, structured logging, optional Sentry and S3 storage. |
+| 📚 **API docs** | OpenAPI 3 schema with Swagger UI and ReDoc. |
 
-## Project structure
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><b>Feed</b><br><img src="docs/screenshots/feed.png" alt="Home feed" /></td>
+    <td align="center"><b>Feed · dark</b><br><img src="docs/screenshots/feed-dark.png" alt="Home feed in dark mode" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Profile</b><br><img src="docs/screenshots/profile.png" alt="Profile page" /></td>
+    <td align="center"><b>Post & comments · dark</b><br><img src="docs/screenshots/post-detail-dark.png" alt="Post detail with comments" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Notifications · dark</b><br><img src="docs/screenshots/notifications-dark.png" alt="Notifications" /></td>
+    <td align="center"><b>Quote a post</b><br><img src="docs/screenshots/quote-dark.png" alt="Quote post modal" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Search</b><br><img src="docs/screenshots/search-people.png" alt="People search" /></td>
+    <td align="center"><b>Hashtag results</b><br><img src="docs/screenshots/search-hashtag.png" alt="Hashtag search" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Settings</b><br><img src="docs/screenshots/settings.png" alt="Settings page" /></td>
+    <td align="center"><b>Edit profile</b><br><img src="docs/screenshots/edit-profile.png" alt="Edit profile modal" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Login</b><br><img src="docs/screenshots/login.png" alt="Login page" /></td>
+    <td align="center"><b>Register</b><br><img src="docs/screenshots/register.png" alt="Register page" /></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/screenshots/mobile-feed.png" alt="Mobile feed" width="24%" />
+  <img src="docs/screenshots/mobile-feed-dark.png" alt="Mobile feed in dark mode" width="24%" />
+  <img src="docs/screenshots/mobile-profile.png" alt="Mobile profile" width="24%" />
+  <img src="docs/screenshots/mobile-notifications.png" alt="Mobile notifications" width="24%" />
+</p>
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| **API** | Python 3.13 · Django 6 · Django REST Framework · SimpleJWT · drf-spectacular · django-filter · Pillow · WhiteNoise · Gunicorn |
+| **Data** | PostgreSQL (SQLite in development) · Redis cache (optional, in-memory fallback) · local volume or S3-compatible media storage |
+| **Web** | React 19 · TypeScript · Vite · Tailwind CSS 4 · TanStack Query · React Router 7 · Zustand · lucide-react · Inter (self-hosted) |
+| **Quality** | Django test runner (97 tests) · Vitest + Testing Library (34 tests) · ruff · ESLint · Prettier · strict TypeScript · GitHub Actions |
+| **Ops** | Docker (multi-stage) · Docker Compose · nginx · Railway config-as-code · health checks · Sentry (optional) |
 
 ```
-├── backend/             # Django REST API
-│   ├── config/          # Settings (env-driven), URLs, WSGI/ASGI
-│   └── apps/
-│       ├── core/        # Pagination, permissions, validators, seed command
-│       ├── users/       # Custom User, Follow, profiles, suggestions
-│       ├── posts/       # Post, PostLike, Comment (+replies)
-│       └── notifications/
-├── frontend/            # React SPA (Vite + TypeScript + Tailwind)
-│   └── src/
-│       ├── lib/         # API client (axios + JWT refresh), types, utils
-│       ├── stores/      # Zustand: auth tokens, theme
-│       ├── hooks/       # TanStack Query hooks
-│       ├── components/  # layout / ui / posts / users
-│       └── pages/
-└── docker-compose.yml   # PostgreSQL + Redis + API + frontend
+├── backend/                 Django project (API)
+│   ├── config/              settings (env-driven), urls, wsgi/asgi
+│   ├── apps/core/           pagination, permissions, throttling, images, text parsing, health, seed
+│   ├── apps/users/          User, Follow, auth, profiles, suggestions
+│   ├── apps/posts/          Post (+repost/quote), likes, bookmarks, hashtags, comments
+│   ├── apps/notifications/  Notification
+│   ├── Dockerfile · docker-entrypoint.sh · railway.json
+├── frontend/                React SPA
+│   ├── src/lib/             api client, types, utils, rich-text tokenizer
+│   ├── src/hooks/           TanStack Query hooks + cache helpers
+│   ├── src/stores/          auth, theme, toasts (Zustand)
+│   ├── src/components/      ui · layout · posts · users
+│   ├── src/pages/           lazy-loaded routes
+│   ├── Dockerfile · nginx.conf.template · railway.json
+├── docs/                    architecture, API reference, development, deployment, screenshots
+├── docker-compose.yml       PostgreSQL + Redis + API + web
+└── .github/workflows/ci.yml
 ```
 
-## Quick start (local development)
+## Quick start
 
-Requirements: Python 3.13+, Node 20+. No database setup needed — development falls back to SQLite and an in-memory cache.
-
-**Backend**
+**Requirements:** Python 3.12+ (3.13 recommended) and Node 20+. No database server needed — development uses SQLite and an in-memory cache.
 
 ```bash
+git clone https://github.com/JonasJavier/cs50w-network.git
+cd cs50w-network
+
+# API
 cd backend
-python -m venv ../.venv
-../.venv/Scripts/activate        # Windows · on Unix: source ../.venv/bin/activate
-pip install -r requirements.txt
+python -m venv ../.venv && source ../.venv/bin/activate     # Windows: ..\.venv\Scripts\activate
+pip install -r requirements-dev.txt
 python manage.py migrate
-python manage.py seed            # optional demo data
-python manage.py runserver
-```
+python manage.py seed              # 8 demo users, posts, comments, reposts, bookmarks, images
+python manage.py runserver         # http://localhost:8000
 
-**Frontend** (second terminal)
-
-```bash
+# Web (second terminal)
 cd frontend
-npm install
-npm run dev
+npm ci
+npm run dev                        # http://localhost:5173
 ```
 
-Open **http://localhost:5173**. With seeded data you can log in as `ada`, `grace`, `linus`, `margaret`, `alan`, `katherine`, `tim` or `hedy` — password `network123`.
+Open **http://localhost:5173** and log in as `ada`, `grace`, `linus`, `margaret`, `alan`, `katherine`, `tim` or `hedy` — password **`network123`**. Swagger UI lives at **http://localhost:8000/api/docs/**.
 
-## Quick start (Docker)
+There is also a `Makefile` (`make help`) and a Docker Compose stack:
 
 ```bash
-docker compose up --build
-docker compose exec api python manage.py seed   # optional demo data
+docker compose up --build                             # web :8080 · api :8000 · PostgreSQL · Redis
+docker compose exec api python manage.py seed         # optional demo data
 ```
 
-- Frontend: http://localhost:8080
-- API: http://localhost:8000 · Swagger UI: http://localhost:8000/api/docs/
+### Configuration
 
-## Configuration
+Everything is driven by environment variables with safe development defaults — see [`backend/.env.example`](backend/.env.example) and [`frontend/.env.example`](frontend/.env.example). The essentials for production:
 
-All backend settings are environment-driven (see [backend/.env.example](backend/.env.example)):
+| Variable | Purpose |
+| --- | --- |
+| `DJANGO_SECRET_KEY` | Long random string (the API refuses to start in production with the dev key) |
+| `DJANGO_DEBUG` | `0` in production → HTTPS redirect, HSTS, secure cookies, hashed static files |
+| `DATABASE_URL` | `postgres://user:pass@host:5432/network` |
+| `REDIS_URL` | `redis://host:6379/0` (optional) |
+| `CORS_ALLOWED_ORIGINS` | Frontend origin(s) |
+| `MEDIA_ROOT` / `AWS_*` | Persistent volume path, or S3-compatible bucket |
+| `VITE_API_URL` | (web, build time) public URL of the API |
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `DJANGO_SECRET_KEY` | dev key | Set a long random string in production |
-| `DJANGO_DEBUG` | `1` | Set `0` in production (enables HSTS, secure cookies, SSL redirect) |
-| `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hosts |
-| `DATABASE_URL` | SQLite file | e.g. `postgres://user:pass@host:5432/network` |
-| `REDIS_URL` | — (local memory) | e.g. `redis://localhost:6379/0` |
-| `CORS_ALLOWED_ORIGINS` | Vite dev server | Comma-separated frontend origins |
-
-Frontend: set `VITE_API_URL` (see [frontend/.env.example](frontend/.env.example)).
-
-## API overview
-
-```
-POST   /api/v1/auth/register/            create account (returns JWT pair)
-POST   /api/v1/auth/token/               login
-POST   /api/v1/auth/token/refresh/       rotate tokens
-POST   /api/v1/auth/logout/              blacklist refresh token
-
-GET    /api/v1/users/me/                 my profile          PATCH to edit
-GET    /api/v1/users/{username}/         public profile
-POST   /api/v1/users/{username}/follow/  follow              DELETE to unfollow
-GET    /api/v1/users/{username}/followers|following/
-GET    /api/v1/users/suggestions/        who to follow
-GET    /api/v1/users/?search=…           search people
-
-GET    /api/v1/posts/                    feed (?feed=following · ?author= · ?search=)
-POST   /api/v1/posts/                    create (multipart for images)
-PATCH  /api/v1/posts/{id}/               edit own           DELETE to remove
-POST   /api/v1/posts/{id}/like/          toggle like
-GET    /api/v1/posts/{id}/comments/      list / POST to comment (parent= for replies)
-POST   /api/v1/comments/{id}/like/       toggle comment like
-
-GET    /api/v1/notifications/            list (+ unread-count/, read-all/, {id}/read/)
-```
-
-Full interactive documentation: `/api/docs/`.
-
-## Tests
+### Tests & quality
 
 ```bash
-cd backend
-python manage.py test     # 32 tests: auth, posts, comments, follows, notifications
+cd backend && python manage.py test --parallel auto && ruff check . && ruff format --check .
+cd frontend && npm run lint && npm run typecheck && npm test && npm run build
+# or, from the root:
+make check
 ```
 
-```bash
-cd frontend
-npm run lint && npm run build
+CI runs the same steps plus `makemigrations --check`, `check --deploy` and both Docker builds on every push and pull request.
+
+## API
+
+Base URL `/api/v1/` — JWT bearer authentication. Full reference in [docs/api.md](docs/api.md); interactive docs at `/api/docs/`.
+
 ```
+POST   auth/register/ · auth/token/ · auth/token/refresh/ · auth/logout/ · auth/password/change/
+GET    users/me/                         PATCH edit profile · DELETE delete account
+GET    users/{username}/                 followers/ · following/ · POST|DELETE follow/
+GET    users/?search= · users/suggestions/
+GET    posts/?feed=following|author=|liked_by=|bookmarked=1|media=1|hashtag=|search=
+POST   posts/                            (multipart: content, image, repost_of_id for quotes)
+PATCH  posts/{id}/ · DELETE posts/{id}/
+POST   posts/{id}/like/ · repost/ · bookmark/          GET posts/{id}/likes/
+GET    posts/{id}/comments/ · POST (parent= for replies)
+PATCH  comments/{id}/ · DELETE · POST comments/{id}/like/
+GET    hashtags/trending/
+GET    notifications/ · unread-count/    POST {id}/read/ · read-all/   DELETE clear/
+GET    /health/
+```
+
+## Deployment
+
+The repository ships two `$PORT`-aware Docker images with health checks and `railway.json` files, so a Railway project is: **Postgres + `api` (root `backend/`) + `web` (root `frontend/`)**, a volume (or S3) for uploads, and a handful of variables. The step-by-step guide, including the exact variables and CLI commands, is in **[docs/deployment-railway.md](docs/deployment-railway.md)**. Docker Compose behind any TLS-terminating proxy works the same way.
+
+## Documentation
+
+- [docs/architecture.md](docs/architecture.md) — how the API and the SPA are put together, data model, query strategy, optimistic updates, accessibility
+- [docs/api.md](docs/api.md) — every endpoint, filter and payload
+- [docs/development.md](docs/development.md) — local setup, everyday commands, troubleshooting
+- [docs/deployment-railway.md](docs/deployment-railway.md) — production deployment
+- [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md)
+
+## Academic origin
+
+The original assignment — a server-rendered Django app with a JavaScript feed — was completed for Harvard's *CS50's Web Programming with Python and JavaScript* (Project 4, "Network"). Everything in this repository is a ground-up rewrite that keeps the spirit of the brief (posts, likes, follows, pagination, profiles) and expands it into a complete product.
 
 ## License
 
-[MIT](LICENSE)
+Released under the [GNU General Public License v3.0](LICENSE).

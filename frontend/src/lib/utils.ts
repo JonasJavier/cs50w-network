@@ -16,8 +16,10 @@ const DIVISIONS: Array<{ amount: number; unit: Intl.RelativeTimeFormatUnit }> = 
   { amount: Number.POSITIVE_INFINITY, unit: 'years' },
 ]
 
-export function timeAgo(iso: string): string {
-  let duration = (new Date(iso).getTime() - Date.now()) / 1000
+/** "just now", "5 minutes ago", "yesterday", "3 weeks ago"… */
+export function timeAgo(iso: string, now: number = Date.now()): string {
+  let duration = (new Date(iso).getTime() - now) / 1000
+  if (Math.abs(duration) < 45) return 'just now'
   for (const division of DIVISIONS) {
     if (Math.abs(duration) < division.amount) {
       return rtf.format(Math.round(duration), division.unit)
@@ -29,6 +31,31 @@ export function timeAgo(iso: string): string {
 
 export function formatMonthYear(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
+/** 999 → "999", 1200 → "1.2K", 3_400_000 → "3.4M" */
+export function formatCount(value: number): string {
+  if (value < 1000) return String(value)
+  if (value < 1_000_000) return `${trimZero(value / 1000)}K`
+  return `${trimZero(value / 1_000_000)}M`
+}
+
+function trimZero(value: number): string {
+  return value.toFixed(1).replace(/\.0$/, '')
+}
+
+export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
+  return `${formatCount(count)} ${count === 1 ? singular : plural}`
 }
 
 export function initials(name: string): string {
@@ -55,4 +82,35 @@ export function gradientFor(seed: string): string {
   let hash = 0
   for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) | 0
   return GRADIENTS[Math.abs(hash) % GRADIENTS.length]!
+}
+
+/** Strip the scheme and trailing slash for display: https://example.com/ → example.com */
+export function prettyUrl(url: string): string {
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+}
+
+/** Copy text to the clipboard, falling back to a hidden textarea on insecure origins. */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+  } catch {
+    /* fall through */
+  }
+  try {
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.setAttribute('readonly', '')
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    const ok = document.execCommand('copy')
+    document.body.removeChild(textarea)
+    return ok
+  } catch {
+    return false
+  }
 }

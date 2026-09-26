@@ -1,24 +1,20 @@
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, fetchPage } from '../lib/api'
-import type {
-  CountPage,
-  FollowResponse,
-  UserCard,
-  UserDetail,
-} from '../lib/types'
+import type { CountPage, FollowResponse, Me, UserCard, UserDetail } from '../lib/types'
 import { useAuthStore } from '../stores/auth'
+import { updateUserEverywhere } from './cache'
 
 export function useProfile(username: string) {
   return useQuery({
     queryKey: ['profile', username],
+    enabled: username.length > 0,
     queryFn: async () => {
-      const { data } = await api.get<UserDetail>(`/users/${username}/`)
+      const { data } = await api.get<UserDetail>(`/users/${encodeURIComponent(username)}/`)
       return data
+    },
+    retry: (failureCount, error) => {
+      const status = (error as { response?: { status?: number } }).response?.status
+      return status !== 404 && failureCount < 1
     },
   })
 }
@@ -39,19 +35,21 @@ export function useSearchUsers(query: string) {
     queryKey: ['user-search', query],
     enabled: query.trim().length > 0,
     queryFn: ({ pageParam }) =>
-      fetchPage<CountPage<UserCard>>(
-        pageParam ?? `/users/?search=${encodeURIComponent(query)}`,
-      ),
+      fetchPage<CountPage<UserCard>>(pageParam ?? `/users/?search=${encodeURIComponent(query)}`),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.next,
   })
 }
 
-export function useRelationList(username: string, relation: 'followers' | 'following') {
+export type Relation = 'followers' | 'following'
+
+export function useRelationList(username: string, relation: Relation) {
   return useInfiniteQuery({
     queryKey: ['relations', username, relation],
     queryFn: ({ pageParam }) =>
-      fetchPage<CountPage<UserCard>>(pageParam ?? `/users/${username}/${relation}/`),
+      fetchPage<CountPage<UserCard>>(
+        pageParam ?? `/users/${encodeURIComponent(username)}/${relation}/`,
+      ),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.next,
   })
@@ -60,33 +58,44 @@ export function useRelationList(username: string, relation: 'followers' | 'follo
 export function useFollow() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({
-      username,
-      follow,
-    }: {
-      username: string
-      follow: boolean
-    }) => {
+    mutationFn: async ({ username, follow }: { username: string; follow: boolean }) => {
+      const url = `/users/${encodeURIComponent(username)}/follow/`
       const { data } = follow
-        ? await api.post<FollowResponse>(`/users/${username}/follow/`)
-        : await api.delete<FollowResponse>(`/users/${username}/follow/`)
+        ? await api.post<FollowResponse>(url)
+        : await api.delete<FollowResponse>(url)
       return data
     },
+    onMutate: async ({ username, follow }) => {
+      await queryClient.cancelQueries({ queryKey: ['profile', username] })
+      updateUserEverywhere(queryClient, username, (user) => ({
+        ...user,
+        is_following: follow,
+        followers_count: Math.max(0, user.followers_count + (follow ? 1 : -1)),
+      }))
+      const me = useAuthStore.getState().user
+      if (me) {
+        useAuthStore
+          .getState()
+          .setUser({ ...me, following_count: Math.max(0, me.following_count + (follow ? 1 : -1)) })
+      }
+    },
     onSuccess: (data, { username }) => {
-      queryClient.setQueryData<UserDetail>(['profile', username], (profile) =>
-        profile && {
-          ...profile,
-          is_following: data.is_following,
-          followers_count: data.followers_count,
-        },
-      )
+      updateUserEverywhere(queryClient, username, (user) => ({
+        ...user,
+        is_following: data.is_following,
+        followers_count: data.followers_count,
+      }))
       queryClient.invalidateQueries({ queryKey: ['suggestions'] })
-      queryClient.invalidateQueries({ queryKey: ['relations'] })
-      queryClient.invalidateQueries({ queryKey: ['user-search'] })
       queryClient.invalidateQueries({ queryKey: ['me'] })
-      queryClient.invalidateQueries({
-        queryKey: ['posts', { feed: 'following' }],
-      })
+      queryClient.invalidateQueries({ queryKey: ['posts', { feed: 'following' }] })
+    },
+    onError: (_error, { username, follow }) => {
+      updateUserEverywhere(queryClient, username, (user) => ({
+        ...user,
+        is_following: !follow,
+        followers_count: Math.max(0, user.followers_count + (follow ? -1 : 1)),
+      }))
+      queryClient.invalidateQueries({ queryKey: ['me'] })
     },
   })
 }
@@ -100,26 +109,32 @@ export interface ProfileUpdateInput {
   website?: string
   avatar?: File | null
   cover?: File | null
+  remove_avatar?: boolean
+  remove_cover?: boolean
 }
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
-  const { setUser } = useAuthStore()
   return useMutation({
     mutationFn: async (input: ProfileUpdateInput) => {
       const form = new FormData()
       for (const [key, value] of Object.entries(input)) {
         if (value === undefined || value === null) continue
+        if (typeof value === 'boolean') {
+          if (value) form.append(key, 'true')
+          continue
+        }
         form.append(key, value)
       }
-      const { data } = await api.patch<UserDetail>('/users/me/', form)
+      const { data } = await api.patch<Me>('/users/me/', form)
       return data
     },
     onSuccess: (user) => {
-      setUser(user)
+      useAuthStore.getState().setUser(user)
       queryClient.setQueryData(['me'], user)
       queryClient.setQueryData(['profile', user.username], user)
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['comments'] })
     },
   })
 }

@@ -2,19 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Network — the professional social network." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Network</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
+    <meta
+      name="description"
+      content="Network — a professional social network. Share updates, follow people you admire and join the conversation."
     />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="application-name" content="Network" />
+    <meta name="apple-mobile-web-app-title" content="Network" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Network — the professional social network" />
+    <meta
+      property="og:description"
+      content="Share updates, follow people you admire and join the conversation."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // Apply the stored theme before React mounts to avoid a flash of the wrong scheme.
+      try {
+        var stored = JSON.parse(localStorage.getItem('network-theme') || 'null')
+        var pref = stored && stored.state && (stored.state.preference || stored.state.theme)
+        var dark =
+          pref === 'dark' ||
+          ((!pref || pref === 'system') && matchMedia('(prefers-color-scheme: dark)').matches)
+        if (dark) document.documentElement.classList.add('dark')
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Network needs JavaScript enabled to run.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
