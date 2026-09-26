@@ -12,6 +12,7 @@ if [ "$(id -u)" = "0" ]; then
   MEDIA_DIR="${MEDIA_ROOT:-/app/media}"
   mkdir -p "$MEDIA_DIR"
   find "$MEDIA_DIR" -maxdepth 1 -exec chown appuser:appuser {} + 2>/dev/null || true
+  export HOME=/home/appuser
   exec setpriv --reuid=appuser --regid=appuser --init-groups "$0" "$@"
 fi
 
