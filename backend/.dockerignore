@@ -6,4 +6,9 @@ db.sqlite3
 media/
 staticfiles/
 .env
+.env.*
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
