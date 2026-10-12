@@ -1,6 +1,6 @@
 # Deploying to Netlify + Render + Neon
 
-> **Reference deployment:** https://jonas-network.netlify.app (web) · API on Render (`network-api`) · Postgres and media on Neon.
+> **Reference deployment:** https://network-jonasjavier.netlify.app (web) · https://network-api-fg8c.onrender.com (API) · Postgres and media on Neon.
 
 All three providers have a free tier that is enough for the demo:
 
@@ -27,7 +27,7 @@ Free-plan trade-off: the Render service sleeps after 15 minutes without traffic,
 | Variable | Value |
 | --- | --- |
 | `DATABASE_URL` | Neon connection string |
-| `CORS_ALLOWED_ORIGINS` | the Netlify origin, e.g. `https://jonas-network.netlify.app` |
+| `CORS_ALLOWED_ORIGINS` | the Netlify origin, e.g. `https://network-jonasjavier.netlify.app` |
 | `AWS_S3_ENDPOINT_URL` | Neon `AWS_ENDPOINT_URL_S3` |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Neon storage credential |
 
@@ -39,7 +39,7 @@ Import the repository. `netlify.toml` sets the base directory (`frontend`), the 
 
 | Variable | Value |
 | --- | --- |
-| `VITE_API_URL` | the Render URL, e.g. `https://network-api.onrender.com` (no trailing slash) |
+| `VITE_API_URL` | the Render URL, e.g. `https://network-api-fg8c.onrender.com` (no trailing slash) |
 
 `VITE_SHOW_DEMO_ACCOUNTS=0` hides the demo-account helper on the login page.
 

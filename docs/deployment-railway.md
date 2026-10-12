@@ -1,6 +1,6 @@
 # Deploying to Railway
 
-> **Reference deployment:** https://web-production-9475c.up.railway.app (web) · https://api-production-53d41.up.railway.app (API) — the setup described below, running on the Railway project `network`.
+> The live demo now runs on Netlify + Render + Neon ([guide](deployment-netlify-render.md)). This Railway setup still works as an alternative.
 
 Network runs as **two services from this monorepo** plus a PostgreSQL database (Redis optional):
 

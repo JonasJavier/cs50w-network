@@ -95,4 +95,4 @@ Two containers (see `backend/Dockerfile`, `frontend/Dockerfile`) that both honou
 - **api** — Gunicorn behind the platform's TLS terminator; migrations run from the entrypoint (or the platform's pre-deploy hook); `/health/` is the probe; media on a mounted volume or S3.
 - **web** — nginx serving the Vite build with an SPA fallback, cache headers and security headers; `/healthz` is the probe; `VITE_API_URL` is baked in at build time.
 
-`docker-compose.yml` reproduces the same topology locally with PostgreSQL and Redis. [`deployment-railway.md`](deployment-railway.md) walks through the production setup on Railway.
+`docker-compose.yml` reproduces the same topology locally with PostgreSQL and Redis. [`deployment-netlify-render.md`](deployment-netlify-render.md) walks through the production setup (Netlify + Render + Neon); [`deployment-railway.md`](deployment-railway.md) covers Railway.
