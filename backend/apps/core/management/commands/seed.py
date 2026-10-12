@@ -234,23 +234,28 @@ PALETTES = [
 ]
 
 
-def _lerp(a, b, t):
-    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
-
-
 def gradient(size, start, end, angle_deg=35):
-    """Linear gradient image using a rotated coordinate."""
+    """Linear gradient image along ``angle_deg`` (clockwise from the x axis).
+
+    Built from Pillow's native gradient instead of a per-pixel loop, so missing
+    images can be regenerated quickly on every boot of an ephemeral container.
+    """
     width, height = size
-    image = Image.new("RGB", size)
-    pixels = image.load()
-    angle = math.radians(angle_deg)
-    cos_a, sin_a = math.cos(angle), math.sin(angle)
-    span = abs(width * cos_a) + abs(height * sin_a)
-    for y in range(height):
-        for x in range(width):
-            t = (x * cos_a + y * sin_a) / span
-            pixels[x, y] = _lerp(start, end, max(0.0, min(1.0, t)))
-    return image
+    # A small mask is enough — the gradient is smooth, so it is upscaled at the end.
+    small = (max(1, math.ceil(width / 4)), max(1, math.ceil(height / 4)))
+    side = math.ceil(math.hypot(*small))
+    # linear_gradient runs top to bottom; stretch its middle half across the
+    # diagonal so the rotated square still covers the frame edge to edge.
+    mask = (
+        Image.linear_gradient("L")
+        .resize((side * 2, side * 2), Image.Resampling.BILINEAR)
+        .point(lambda v: max(0, min(255, (v - 64) * 2)))
+        .rotate(90 - angle_deg, resample=Image.Resampling.BILINEAR)
+    )
+    left, top = side - small[0] // 2, side - small[1] // 2
+    mask = mask.crop((left, top, left + small[0], top + small[1]))
+    mask = mask.resize(size, Image.Resampling.BILINEAR)
+    return Image.composite(Image.new("RGB", size, end), Image.new("RGB", size, start), mask)
 
 
 def abstract_image(rng: random.Random, size, palette):
@@ -285,6 +290,11 @@ def avatar_image(rng: random.Random, initials: str, palette):
     font = ImageFont.load_default(size=200)  # Pillow's bundled scalable font
     draw.text((256, 256), initials, fill=(255, 255, 255), font=font, anchor="mm")
     return image
+
+
+def needs_file(field) -> bool:
+    """Empty, or pointing at a file the storage no longer has (ephemeral disk wiped)."""
+    return not field or not field.storage.exists(field.name)
 
 
 def to_content_file(image: Image.Image, name: str) -> ContentFile:
@@ -329,7 +339,7 @@ class Command(BaseCommand):
                 user.set_password(DEMO_PASSWORD)
                 user.save(update_fields=["password"])
             palette = PALETTES[index % len(PALETTES)]
-            if with_images and not user.avatar and index % 2 == 0:
+            if with_images and needs_file(user.avatar) and index % 2 == 0:
                 user.avatar.save(
                     f"{username}.webp",
                     to_content_file(
@@ -337,7 +347,7 @@ class Command(BaseCommand):
                     ),
                     save=True,
                 )
-            if with_images and not user.cover and index % 3 == 0:
+            if with_images and needs_file(user.cover) and index % 3 == 0:
                 user.cover.save(
                     f"{username}-cover.webp",
                     to_content_file(abstract_image(image_rng, (1600, 600), palette), "c.webp"),
@@ -370,7 +380,7 @@ class Command(BaseCommand):
             if created:
                 sync_hashtags(post)
                 notify_mentions(users[username], content, post)
-            if with_images and has_image and not post.image:
+            if with_images and has_image and needs_file(post.image):
                 palette = PALETTES[(index * 3) % len(PALETTES)]
                 post.image.save(
                     f"seed-{index}.webp",

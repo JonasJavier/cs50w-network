@@ -6,8 +6,9 @@ Defaults are tuned for local development: SQLite + local-memory cache, so the
 project runs out of the box. Point DATABASE_URL / REDIS_URL at PostgreSQL and
 Redis for staging/production and set DJANGO_DEBUG=0.
 
-Railway: RAILWAY_PUBLIC_DOMAIN and RAILWAY_PRIVATE_DOMAIN are picked up
-automatically so ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS need no manual entry.
+Railway (RAILWAY_PUBLIC_DOMAIN, RAILWAY_PRIVATE_DOMAIN) and Render
+(RENDER_EXTERNAL_HOSTNAME) domains are picked up automatically so
+ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS need no manual entry.
 """
 
 import os
@@ -67,6 +68,13 @@ for _railway_domain in (os.getenv("RAILWAY_PUBLIC_DOMAIN"), os.getenv("RAILWAY_P
         ALLOWED_HOSTS.append(_railway_domain)
 if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
     CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}")
+
+# Render does the same with RENDER_EXTERNAL_HOSTNAME (e.g. network-api.onrender.com).
+_render_host = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if _render_host:
+    if _render_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_render_host)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{_render_host}")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -275,6 +283,8 @@ if USE_S3_MEDIA:
     AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or None
     AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN") or None
+    # "path" for providers without virtual-hosted buckets (Neon Object Storage, MinIO).
+    AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE") or None
     AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
