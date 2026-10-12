@@ -10,12 +10,12 @@ Feed with reposts & quotes · threaded comments · @mentions & #hashtags · book
 
 <br>
 
-<a href="https://web-production-9475c.up.railway.app"><img src="https://img.shields.io/badge/%F0%9F%9A%80_LIVE_DEMO-Open_the_app-4f46e5?style=for-the-badge" alt="Open the live demo" height="40" /></a>
+<a href="https://network-jonasjavier.netlify.app"><img src="https://img.shields.io/badge/%F0%9F%9A%80_LIVE_DEMO-Open_the_app-4f46e5?style=for-the-badge" alt="Open the live demo" height="40" /></a>
 
-### 🌐 Try it now → **[web-production-9475c.up.railway.app](https://web-production-9475c.up.railway.app)**
+### 🌐 Try it now → **[network-jonasjavier.netlify.app](https://network-jonasjavier.netlify.app)**
 
-Log in with any demo account — `ada`, `grace`, `linus`, `margaret`, `alan`, `katherine`, `tim`, `hedy` — password **`network123`**, or create your own.<br>
-API: [api-production-53d41.up.railway.app/api/docs](https://api-production-53d41.up.railway.app/api/docs/) (Swagger) · [/health/](https://api-production-53d41.up.railway.app/health/)
+Log in with any demo account — `ada`, `grace`, `linus`, `margaret`, `alan`, `katherine`, `tim`, `hedy` — password **`network123`**, or create your own. The API runs on a free instance, so the first request after a quiet spell can take about 50 seconds.<br>
+API: [network-api-fg8c.onrender.com/api/docs](https://network-api-fg8c.onrender.com/api/docs/) (Swagger) · [/health/](https://network-api-fg8c.onrender.com/health/)
 
 <br>
 
@@ -28,13 +28,13 @@ API: [api-production-53d41.up.railway.app/api/docs](https://api-production-53d41
 ![Tailwind CSS 4](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)
 
-[**Live demo**](https://web-production-9475c.up.railway.app) · [Features](#features) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [API](#api) · [Deployment](#deployment) · [Docs](#documentation)
+[**Live demo**](https://network-jonasjavier.netlify.app) · [Features](#features) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Quick start](#quick-start) · [API](#api) · [Deployment](#deployment) · [Docs](#documentation)
 
 </div>
 
 ---
 
-Network started as Harvard's **CS50W Project 4** and was rebuilt from scratch as a modern, decoupled application: a Django REST API and a React single-page app, each with its own tests, Docker image and CI pipeline. It is designed to be deployed as-is (Railway, Docker Compose, any container platform) and to read like a real product, not a homework assignment.
+Network started as Harvard's **CS50W Project 4** and was rebuilt from scratch as a modern, decoupled application: a Django REST API and a React single-page app, each with its own tests, Docker image and CI pipeline. It is designed to be deployed as-is (Netlify + Render + Neon, Railway, Docker Compose, any container platform) and to read like a real product, not a homework assignment.
 
 ## Features
 
@@ -100,7 +100,7 @@ Network started as Harvard's **CS50W Project 4** and was rebuilt from scratch as
 | **Data** | PostgreSQL (SQLite in development) · Redis cache (optional, in-memory fallback) · local volume or S3-compatible media storage |
 | **Web** | React 19 · TypeScript · Vite · Tailwind CSS 4 · TanStack Query · React Router 7 · Zustand · lucide-react · Inter (self-hosted) |
 | **Quality** | Django test runner (97 tests) · Vitest + Testing Library (34 tests) · ruff · ESLint · Prettier · strict TypeScript · GitHub Actions |
-| **Ops** | Docker (multi-stage) · Docker Compose · nginx · Railway config-as-code · health checks · Sentry (optional) |
+| **Ops** | Docker (multi-stage) · Docker Compose · nginx · Netlify / Render / Railway config-as-code · health checks · Sentry (optional) |
 
 ```
 ├── backend/                 Django project (API)
@@ -200,16 +200,19 @@ GET    /health/
 
 ## Deployment
 
-**Production instance (Railway):** web **https://web-production-9475c.up.railway.app** · API **https://api-production-53d41.up.railway.app** (health check at `/health/`, Swagger at `/api/docs/`).
+**Production instance:** web **https://network-jonasjavier.netlify.app** (Netlify) · API **https://network-api-fg8c.onrender.com** (Render; health check at `/health/`, Swagger at `/api/docs/`) · PostgreSQL and uploaded media on Neon.
 
-The repository ships two `$PORT`-aware Docker images with health checks and `railway.json` files, so a Railway project is: **Postgres + `api` (root `backend/`) + `web` (root `frontend/`)**, a volume (or S3) for uploads, and a handful of variables. The step-by-step guide, including the exact variables and CLI commands, is in **[docs/deployment-railway.md](docs/deployment-railway.md)**. Docker Compose behind any TLS-terminating proxy works the same way.
+`netlify.toml` builds the SPA and `render.yaml` is a Render Blueprint for the API's Docker image. Uploads go to Neon's S3-compatible Object Storage because the free Render disk is ephemeral. The step-by-step guide is in **[docs/deployment-netlify-render.md](docs/deployment-netlify-render.md)**.
+
+The same two `$PORT`-aware Docker images also ship `railway.json` files for a Railway project (**Postgres + `api` + `web`**), see **[docs/deployment-railway.md](docs/deployment-railway.md)**. Docker Compose behind any TLS-terminating proxy works the same way.
 
 ## Documentation
 
 - [docs/architecture.md](docs/architecture.md) — how the API and the SPA are put together, data model, query strategy, optimistic updates, accessibility
 - [docs/api.md](docs/api.md) — every endpoint, filter and payload
 - [docs/development.md](docs/development.md) — local setup, everyday commands, troubleshooting
-- [docs/deployment-railway.md](docs/deployment-railway.md) — production deployment
+- [docs/deployment-netlify-render.md](docs/deployment-netlify-render.md) — production deployment (Netlify + Render + Neon)
+- [docs/deployment-railway.md](docs/deployment-railway.md) — alternative deployment on Railway
 - [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md)
 
 ## Academic origin
