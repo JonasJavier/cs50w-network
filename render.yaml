@@ -1,15 +1,16 @@
 # Render Blueprint for the Network API (Django). The React frontend is deployed
-# separately on Netlify (see netlify.toml) and PostgreSQL lives on Neon.
+# on Netlify (netlify.toml); PostgreSQL and the uploaded media live on Neon
+# (Postgres + S3-compatible Object Storage). See docs/deployment-netlify-render.md.
 #
-# Free plan notes: the service sleeps after 15 min without traffic (first
-# request takes ~50 s) and the disk is ephemeral, so SEED_ON_START re-creates
-# the demo data's images on every boot. See docs/deployment-netlify-render.md.
+# Free plan: the service sleeps after 15 min without traffic, so the first
+# request after a pause takes ~50 s. Values marked `sync: false` are asked for
+# when the Blueprint is created.
 services:
   - type: web
     name: network-api
     runtime: docker
     plan: free
-    region: oregon
+    region: ohio
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
@@ -20,14 +21,26 @@ services:
         generateValue: true
       - key: DJANGO_DEBUG
         value: "0"
-      # Neon connection string (postgresql://…?sslmode=require), set in the dashboard.
+      # Neon Postgres connection string (postgresql://…?sslmode=require).
       - key: DATABASE_URL
         sync: false
-      # Netlify site origin, e.g. https://network-jonas.netlify.app
+      # Netlify site origin, e.g. https://jonas-network.netlify.app
       - key: CORS_ALLOWED_ORIGINS
         sync: false
-      - key: MEDIA_ROOT
-        value: /app/media
+      # Neon Object Storage — public bucket for avatars, covers and post images.
+      - key: AWS_STORAGE_BUCKET_NAME
+        value: media
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        value: us-east-2
+      - key: AWS_S3_ADDRESSING_STYLE
+        value: path
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      # Load the idempotent demo data set on every boot.
       - key: SEED_ON_START
         value: "1"
       - key: WEB_CONCURRENCY
