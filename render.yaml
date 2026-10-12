@@ -1,0 +1,38 @@
+# Render Blueprint for the Network API (Django). The React frontend is deployed
+# separately on Netlify (see netlify.toml) and PostgreSQL lives on Neon.
+#
+# Free plan notes: the service sleeps after 15 min without traffic (first
+# request takes ~50 s) and the disk is ephemeral, so SEED_ON_START re-creates
+# the demo data's images on every boot. See docs/deployment-netlify-render.md.
+services:
+  - type: web
+    name: network-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    branch: main
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "0"
+      # Neon connection string (postgresql://…?sslmode=require), set in the dashboard.
+      - key: DATABASE_URL
+        sync: false
+      # Netlify site origin, e.g. https://network-jonas.netlify.app
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: MEDIA_ROOT
+        value: /app/media
+      - key: SEED_ON_START
+        value: "1"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: DB_CONN_MAX_AGE
+        value: "60"
+      - key: LOG_LEVEL
+        value: INFO
