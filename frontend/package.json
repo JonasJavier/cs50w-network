@@ -48,7 +48,7 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12",
+    "vite": "^8.3.5",
     "vitest": "^5.0.2"
   },
   "description": "Network \u2014 React SPA for the professional social network",
